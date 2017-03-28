@@ -1,0 +1,9 @@
+---
+applications:
+  - name: ec-data-migration
+    memory: 1024M
+    instances: 1
+    stack: cflinuxfs2
+    path: .
+    command: node ./app.js
+    buildpack: https://github.com/cloudfoundry/buildpack-nodejs.git

@@ -1,0 +1,13 @@
+{
+    "name": "data-migratino-app",
+    "description": "Data Migration Node App",
+    "dependencies": {
+	"pg": "^4.4.3"
+    },
+    "license": "ISC",
+    "engines": {
+	"node": "^6.2.1",
+	"npm": "*"
+    },
+    "devDependencies": {}
+}
