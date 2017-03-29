@@ -42,8 +42,10 @@ class PGClass {
 
 	return obj;
     }
-
-    map2Obj(map){
+/*
+    map2Obj(qid){
+	
+	
 	let _po={};
 	map.forEach((value, key) => {
 	    _po[key]=value;
@@ -51,7 +53,7 @@ class PGClass {
 
 	return _po;
     }
-
+*/
     randomString(size, chars){
 	size = size || 6;
 	chars = chars || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -63,8 +65,14 @@ class PGClass {
 	return ret;
     }
     
-    status(){
-	return this.map2Obj(this.queue);
+    status(qid){
+	
+	let map=this.queue.get(qid);
+	if (!map)
+	    return {};
+
+	return map;
+	//return this.map2Obj(qid);
     }
 }
 
@@ -94,8 +102,9 @@ http.createServer((req, res)=>{
 	});
     }
 
+    console.log(`req.url.indexOf: ${req.url.indexOf("/sql")}`);
     
-    if (req.url==="/sql"){
+    if (req.url.indexOf("/sql")===0){
 
 	switch (req.method.toLowerCase()){
 
@@ -142,8 +151,9 @@ http.createServer((req, res)=>{
 
 	//to get the overall status
 	case "get":
+	    let _p = PATH.normalize(req.url).replace(/^(\.\.[\/\\])+/, '').replace("/sql/","");
 	    res.writeHead(201,{"Content-Type": "application/json"});
-	    return res.end(JSON.stringify(_pg.status()));
+	    return res.end(JSON.stringify(_pg.status(_p)));
 	default:
 	    res.writeHead(501);
 	    return res.end();
