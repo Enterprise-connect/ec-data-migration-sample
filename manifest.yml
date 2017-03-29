@@ -5,5 +5,5 @@ applications:
     instances: 1
     stack: cflinuxfs2
     path: .
-    command: node ./app.js
+    command: ./ec.sh
     buildpack: https://github.com/cloudfoundry/buildpack-nodejs.git

@@ -2,7 +2,8 @@
     "name": "data-migratino-app",
     "description": "Data Migration Node App",
     "dependencies": {
-	"pg": "^4.4.3"
+	"pg": "^4.4.3",
+	"pg-pool":"^1.6.0"
     },
     "license": "ISC",
     "engines": {

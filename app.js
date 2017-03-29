@@ -5,7 +5,7 @@
 const http = require('http');
 const PATH = require("path");
 const FS = require("fs");
-const PG = require('pg');
+const Pool = require('pg-pool')
 
 class PGClass {
     
@@ -16,33 +16,28 @@ class PGClass {
     execSql(conf,scrpt,vars){
 	let qid=this.randomString(6);
 	this.queue.set(qid,{
-	    status:"connecting",
+	    status:"in-progress",
 	    result:{},
 	    err:{},
-	    pool:new PG.Pool(conf)
+	    qid:qid
 	});
 
-	let obj=this.queue.get(qid);
+	let pool=new Pool(conf);
 	
-	obj.pool.connect((err, client, done)=>{
-	    if(err) {
-		return console.error('error fetching client from pool', err);
-	    }
+	let obj=this.queue.get(qid);
 
-	    obj.status="in-progress";
-	    
-	    client.query(scrpt, vars,(err, result)=>{
+	pool.connect((err, client, done) => {
+	    if (err) return done(err);
 
-		done(err);
-
-		if(err) {
-		    obj.err=err;
-		    return console.error('error running query', err);
+	    client.query(scrpt, vars, (err, res) => {
+		done()
+		if (err) {
+		    obj.status="error";
+		    return obj.err=e;
 		}
-		obj.status="done";
-		obj.result=result;
-		//console.log(result.rows[0].number);
-	    });
+		obj.status="completed";
+		obj.result=res;
+	    })
 	});
 
 	return obj;
@@ -132,11 +127,13 @@ http.createServer((req, res)=>{
 		debugger;
 		try {
 		    _body=JSON.parse(_chunk);
+		    console.log(`${_body}`);
 		    let _sts=_pg.execSql(_body.conn,_body.script,_body.vars);
 		    res.writeHead(201,{"Content-Type": "application/json"});
-		    return res.end(_sts);
+		    return res.end(JSON.stringify(_sts));
 		}
 		catch(e){
+		    console.log(e);
 		    res.writeHead(501);
 		    return res.end();
 		}
@@ -146,7 +143,7 @@ http.createServer((req, res)=>{
 	//to get the overall status
 	case "get":
 	    res.writeHead(201,{"Content-Type": "application/json"});
-	    return res.end(_pg.status())
+	    return res.end(JSON.stringify(_pg.status()));
 	default:
 	    res.writeHead(501);
 	    return res.end();
